@@ -1,40 +1,54 @@
 const   QUESTIONS = document.querySelectorAll('.question'),
-        scoreContainer = document.querySelector('.user-score-container'),
+        score_container = document.querySelector('.user-score-container'),
         score_window = document.querySelector('.score-window'),
         submit_btn = document.querySelector('button[type="submit"]'),
         scroll_btn = document.querySelector('#scroll-btn'),
         review_btn = document.querySelector('#review-btn'),
-        pageHeight = document.body.offsetHeight,
+        page_height = document.body.offsetHeight,
         score = document.getElementById('score')
-
-
-const uncheckCheckboxes = checkboxes => {
-    checkboxes.forEach(checkbox => checkbox.checked = false)
-}
 
 import json from './answers.json' assert {type: 'json'}
 
-let hitPercentage = 0
+let user_hit_percentage = 0
 
-const verifyCheck = question => {
+function uncheck_checkboxes(checkboxes) {
 
-    const options = question.querySelectorAll('input')
-    let checked = false
+    checkboxes.forEach(_ => _.checked = false)
 
-    options.forEach(option => option.addEventListener('change', elemChanged => {
-        const   text = elemChanged.target.parentElement.textContent,
-                checkbox = elemChanged.target
-
-        uncheckCheckboxes(options)
-
-        checkbox.checked = true
-    }))
 }
 
-QUESTIONS.forEach(question => verifyCheck(question))
+function change_chosen_option(question) {
 
-const processQuizResult = sub => {
-    sub.preventDefault()
+    const   current_checkboxes = question.currentTarget.querySelectorAll('input[type=checkbox]'),
+            clicked_checkbox = question.target
+
+    uncheck_checkboxes(current_checkboxes)
+    
+    clicked_checkbox.checked = true
+
+}
+
+function hide_score_window() {
+
+    score_window.classList.remove('big')
+
+    submit_btn.disabled = true
+
+    setTimeout(()=> score_container.classList.add('d-none'), 201)
+
+}
+
+function scroll_to_bottom() {
+
+    scrollTo({
+        top: page_height,
+        left: 0,
+        behavior: "smooth"
+    })
+
+}
+
+function scroll_to_top() {
 
     scrollTo({
         top: 0,
@@ -42,46 +56,82 @@ const processQuizResult = sub => {
         behavior: "smooth"
     })
 
-    for (const question in json){
-        const   number = question,
-                options = document.querySelectorAll(`.question${number} input[type=checkbox]`),
-                currentQuestion = document.querySelector(`.question${question}`),
-                questionExplanation = currentQuestion.querySelector('p'),
-                numberOfQuestions = QUESTIONS.length,
-                correctOptionPercentualValue = Math.round(100 / numberOfQuestions)
+}
 
-        function getCheckedOption() {
+function show_or_hide_scroll_btn() {
 
-            let checkedOption = null
+    const page_bottom_is_hided = scrollY < (page_height / 1.5)
 
-            for (let i = 0; i < options.length; i++) {
-    
-                if (options[i].checked === true) {
-                    
-                    checkedOption = options[i].value
-                    break
-                }
-            }
+    if (page_bottom_is_hided)
 
-            return checkedOption
-        }
-        
-        const userAnswer = getCheckedOption()
+        scroll_btn.classList.remove('d-none')
 
-        if (json[question].option == userAnswer) {
+    else
 
-            questionExplanation.setAttribute('class','correct')
+        scroll_btn.setAttribute('class', 'd-none')
 
-            hitPercentage += correctOptionPercentualValue
+}
+
+function get_checked_option_by_user(options) {
+
+    let user_option = null
+
+    for (let i = 0; i < options.length; i++) {
+
+        const   current_option_is_checked = options[i].checked === true,
+                option_value = options[i].value
+
+        if (current_option_is_checked) {
             
-        } else {
-            questionExplanation.classList.remove('correct')
+            user_option = option_value
+
+            break
         }
 
-        questionExplanation.textContent = json[question].answer
     }
 
-    scoreContainer.classList.remove('d-none')
+    return user_option
+}
+
+function validate_user_answer_and_get_feedback() {
+
+    for (const question in json) {
+
+        const   number = question,
+                options = document.querySelectorAll(`.question${number} input[type=checkbox]`),
+                current_question = document.querySelector(`.question${question}`),
+                number_of_questions = QUESTIONS.length,
+                correct_option_percentual_value = Math.round(100 / number_of_questions);
+
+        get_checked_option_by_user(options)
+
+        const   feedback_paragraph = document.createElement('p'),
+                user_answer = get_checked_option_by_user(options),
+                quiz_answer = json[question].option,
+                question_feedback = json[question].answer
+
+        let     answer_status = '🟢 CORRETO: '
+
+        if (quiz_answer == user_answer) {
+
+            feedback_paragraph.setAttribute('class','correct')            
+
+            user_hit_percentage += correct_option_percentual_value
+            
+        } else {
+
+            feedback_paragraph.classList.remove('correct')
+
+            answer_status = '🔴 ERRADO: '
+        }
+
+        feedback_paragraph.textContent = answer_status + question_feedback
+
+        current_question.appendChild(feedback_paragraph)
+    }
+}
+
+function animate_user_score() {
 
     setTimeout(()=> {
 
@@ -91,8 +141,10 @@ const processQuizResult = sub => {
 
         const timer = setInterval(()=> {
 
-            if (counter === hitPercentage) {
+            if (counter === user_hit_percentage) {
+
                 return clearInterval(timer)
+
             }
 
             score.innerText = `${++counter}%`
@@ -103,33 +155,32 @@ const processQuizResult = sub => {
 
 }
 
-const hideScoreWindow = () => {
+function process_quiz_result(event) {
 
-    score_window.classList.remove('big')
-    submit_btn.disabled = true
+    event.preventDefault()
 
-    setTimeout(()=> scoreContainer.classList.add('d-none'), 201)
+    scroll_to_top()
 
-}
+    validate_user_answer_and_get_feedback()
 
-scroll_btn.onclick = () => {
+    score_container.classList.remove('d-none')
 
-    scrollTo({
-        top: pageHeight,
-        left: 0,
-        behavior: "smooth"
-    })
+    animate_user_score()
 
 }
 
-document.onscroll = ()=> {
-    if (scrollY < (pageHeight / 2)) {
-        scroll_btn.classList.remove('d-none')
-    } else {
-        scroll_btn.setAttribute('class', 'd-none')
-    }
+function when_the_user_check_answers(question) {
+
+    question.oninput = change_chosen_option
+
 }
 
-submit_btn.onclick = processQuizResult
+QUESTIONS.forEach(when_the_user_check_answers)
 
-review_btn.onclick = hideScoreWindow
+document.onscroll = show_or_hide_scroll_btn
+
+scroll_btn.onclick = scroll_to_bottom
+
+submit_btn.onclick = process_quiz_result
+
+review_btn.onclick = hide_score_window
