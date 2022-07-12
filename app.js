@@ -1,32 +1,15 @@
-const   QUESTIONS = document.querySelectorAll('.question'),
-        score_container = document.querySelector('.user-score-container'),
+const   score_container = document.querySelector('.user-score-container'),
         score_window = document.querySelector('.score-window'),
         submit_btn = document.querySelector('button[type="submit"]'),
         scroll_btn = document.querySelector('#scroll-btn'),
         review_btn = document.querySelector('#review-btn'),
         page_height = document.body.offsetHeight,
-        score = document.getElementById('score')
+        score = document.getElementById('score'),
+        form = document.querySelector('form')
 
-import json from './answers.json' assert {type: 'json'}
+import quizAnswers from './answers.json' assert {type: 'json'}
 
 let user_hit_percentage = 0
-
-function uncheck_checkboxes(checkboxes) {
-
-    checkboxes.forEach(_ => _.checked = false)
-
-}
-
-function change_chosen_option(question) {
-
-    const   current_checkboxes = question.currentTarget.querySelectorAll('input[type=checkbox]'),
-            clicked_checkbox = question.target
-
-    uncheck_checkboxes(current_checkboxes)
-    
-    clicked_checkbox.checked = true
-
-}
 
 function hide_score_window() {
 
@@ -72,63 +55,49 @@ function show_or_hide_scroll_btn() {
 
 }
 
-function get_checked_option_by_user(options) {
+function getUserScore() {
 
-    let user_option = null
+    const questionsAmount = Object.keys(quizAnswers).length
 
-    for (let i = 0; i < options.length; i++) {
+    for (const question in quizAnswers) {
 
-        const   current_option_is_checked = options[i].checked === true,
-                option_value = options[i].value
+        const quizAnswer = quizAnswers[question].option
+        const userAnswer = form[`inputQuestion${question}`].value
 
-        if (current_option_is_checked) {
-            
-            user_option = option_value
-
-            break
-        }
-
+        if (quizAnswer === userAnswer)
+            user_hit_percentage += 100 / questionsAmount
     }
 
-    return user_option
 }
 
-function validate_user_answer_and_get_feedback() {
+function printFeedback() {
 
-    for (const question in json) {
+    const status = {
+        correct: "🟢 CORRETO: ",
+        wrong: "🔴 ERRADO: "
+    }
 
-        const   number = question,
-                options = document.querySelectorAll(`.question${number} input[type=checkbox]`),
-                current_question = document.querySelector(`.question${question}`),
-                number_of_questions = QUESTIONS.length,
-                correct_option_percentual_value = Math.round(100 / number_of_questions);
+    for (const question in quizAnswers) {
 
-        get_checked_option_by_user(options)
+        const quizAnswer = quizAnswers[question].option
+        const userAnswer = form[`inputQuestion${question}`].value
 
-        const   feedback_paragraph = document.createElement('p'),
-                user_answer = get_checked_option_by_user(options),
-                quiz_answer = json[question].option,
-                question_feedback = json[question].answer
+        const paragraph = document.createElement('p')
 
-        let     answer_status = '🟢 CORRETO: '
+        const feedback = quizAnswers[question].answer
+        const currentQuestion = form.querySelector(`.question${question}`)
 
-        if (quiz_answer == user_answer) {
-
-            feedback_paragraph.setAttribute('class','correct')            
-
-            user_hit_percentage += correct_option_percentual_value
-            
+        if (quizAnswer === userAnswer) {
+            paragraph.textContent = status.correct + feedback
+            paragraph.setAttribute('class','correct')
         } else {
-
-            feedback_paragraph.classList.remove('correct')
-
-            answer_status = '🔴 ERRADO: '
+            paragraph.textContent = status.wrong + feedback
+            paragraph.classList.remove('correct')
         }
 
-        feedback_paragraph.textContent = answer_status + question_feedback
-
-        current_question.appendChild(feedback_paragraph)
+        currentQuestion.appendChild(paragraph)
     }
+
 }
 
 function animate_user_score() {
@@ -161,21 +130,15 @@ function process_quiz_result(event) {
 
     scroll_to_top()
 
-    validate_user_answer_and_get_feedback()
+    getUserScore()
+
+    printFeedback()
 
     score_container.classList.remove('d-none')
 
     animate_user_score()
 
 }
-
-function when_the_user_check_answers(question) {
-
-    question.oninput = change_chosen_option
-
-}
-
-QUESTIONS.forEach(when_the_user_check_answers)
 
 document.onscroll = show_or_hide_scroll_btn
 
