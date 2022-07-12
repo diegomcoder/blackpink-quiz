@@ -1,42 +1,42 @@
 {
-    "01": {
+    "1": {
         "option" : "D",
-        "answer" : "BLACKPINK é um grupo feminino sul-coreano formado pela YG Entertainment em 2016."
+        "feedback" : "BLACKPINK é um grupo feminino sul-coreano formado pela YG Entertainment em 2016."
     },
-    "02": {
+    "2": {
         "option" : "C",
-        "answer" : "O fã-clube do grupo é chamado de Blink."
+        "feedback" : "O fã-clube do grupo é chamado de Blink."
     },
-    "03": {
+    "3": {
         "option" : "E",
-        "answer" : "O grupo é formado por duas coreanas (Jisoo e Jennie), uma tailandesa (Lisa) e uma neozelandesa (Rosé)"
+        "feedback" : "O grupo é formado por duas coreanas (Jisoo e Jennie), uma tailandesa (Lisa) e uma neozelandesa (Rosé)"
     },
-    "04": {
+    "4": {
         "option" : "A",
-        "answer" : "How You Like That se destaca como a música mais popular no Spotify, seguida por BOOMBAYAH e As If It's Your Last."
+        "feedback" : "How You Like That se destaca como a música mais popular no Spotify, seguida por BOOMBAYAH e As If It's Your Last."
     },
-    "05": {
+    "5": {
         "option" : "B",
-        "answer" : "Chillin' Chillin', Nobody Like You e You Make Me são canções do grupo feminino ITZY."
+        "feedback" : "Chillin' Chillin', Nobody Like You e You Make Me são canções do grupo feminino ITZY."
     },
-    "06": {
+    "6": {
         "option" : "D",
-        "answer" : "A Jisoo é completamente apaixonada pelo Pikachu e já fez até imitações do Pokémon."
+        "feedback" : "A Jisoo é completamente apaixonada pelo Pikachu e já fez até imitações do Pokémon."
     },
-    "07": {
+    "7": {
         "option" : "B",
-        "answer" : "Antes de ser idol, Rosé já foi líder de torcida."
+        "feedback" : "Antes de ser idol, Rosé já foi líder de torcida."
     },
-    "08": {
+    "8": {
         "option" : "D",
-        "answer" : "Roseanne Park nasceu em 11 de fevereiro de 1997 (25 anos) e é a mais jóvem do grupo. Kim Jisoo, nasceu em 3 de janeiro de 1995 (27 anos) e é a mais velha do grupo."
+        "feedback" : "Roseanne Park nasceu em 11 de fevereiro de 1997 (25 anos) e é a mais jóvem do grupo. Kim Jisoo, nasceu em 3 de janeiro de 1995 (27 anos) e é a mais velha do grupo."
     },
-    "09": {
+    "9": {
         "option" : "A",
-        "answer" : "A Rosé já contou que chora quando come algo delicioso. E ela já mostrou, em um programa de TV coreano, que consegue rodar o próprio braço em 360°."
+        "feedback" : "A Rosé já contou que chora quando come algo delicioso. E ela já mostrou, em um programa de TV coreano, que consegue rodar o próprio braço em 360°."
     },
     "10": {
         "option" : "E",
-        "answer" : "Jung Kook, membro do BTS, não teve colaboração musical com BLACKPINK."
+        "feedback" : "Jung Kook, membro do BTS, não teve colaboração musical com BLACKPINK."
     }
 }

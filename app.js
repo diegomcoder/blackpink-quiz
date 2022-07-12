@@ -1,37 +1,29 @@
-const   score_container = document.querySelector('.user-score-container'),
-        score_window = document.querySelector('.score-window'),
-        submit_btn = document.querySelector('button[type="submit"]'),
-        scroll_btn = document.querySelector('#scroll-btn'),
-        review_btn = document.querySelector('#review-btn'),
-        page_height = document.body.offsetHeight,
-        score = document.getElementById('score'),
-        form = document.querySelector('form')
+const form = document.querySelector('form')
+const scoreContainer = document.querySelector('.user-score-container')
 
-import quizAnswers from './answers.json' assert {type: 'json'}
+const submitButton = document.querySelector('#submit-btn')
+const scrollButton = document.querySelector('#scroll-btn')
+const reviewButton = document.querySelector('#review-btn')
 
-let user_hit_percentage = 0
 
-function hide_score_window() {
+import quizAnswersObject from './answers.json' assert {type: 'json'}
 
-    score_window.classList.remove('big')
+const userHitSequence = []
+let userHitPercentage = 0
 
-    submit_btn.disabled = true
+const pageHeight = document.body.offsetHeight
 
-    setTimeout(()=> score_container.classList.add('d-none'), 201)
-
-}
-
-function scroll_to_bottom() {
+function scrollToBottom() {
 
     scrollTo({
-        top: page_height,
+        top: pageHeight,
         left: 0,
         behavior: "smooth"
     })
 
 }
 
-function scroll_to_top() {
+function scrollToTop() {
 
     scrollTo({
         top: 0,
@@ -41,76 +33,122 @@ function scroll_to_top() {
 
 }
 
-function show_or_hide_scroll_btn() {
+function changeScrollButtonVisibility() {
 
-    const page_bottom_is_hided = scrollY < (page_height / 1.5)
+    function showScrollBtn() {
+        scrollButton.classList.remove('d-none')
+    }
+    
+    function HideScrollBtn() {
+        scrollButton.setAttribute('class', 'd-none')
+    }
 
-    if (page_bottom_is_hided)
+    const pageBottomIsHided = scrollY < (pageHeight / 2)
 
-        scroll_btn.classList.remove('d-none')
+    pageBottomIsHided ? showScrollBtn() : HideScrollBtn()
+}
 
-    else
+function getUserHits() {
 
-        scroll_btn.setAttribute('class', 'd-none')
+    for (const questionNumber in quizAnswersObject) {
 
+        const quizAnswer = quizAnswersObject[questionNumber].option
+        const userAnswer = form[`inputQuestion${questionNumber}`].value
+
+        if (quizAnswer === userAnswer)
+            userHitSequence.push(true)
+        else
+            userHitSequence.push(false)
+    }
 }
 
 function getUserScore() {
+    let points = 0
 
-    const questionsAmount = Object.keys(quizAnswers).length
+    userHitSequence.forEach(correctResult => {
+        correctResult ? points++ : null
+    })
 
-    for (const question in quizAnswers) {
+    const questionsAmount = Object.keys(quizAnswersObject).length
+    const hitValue = 100 / questionsAmount
 
-        const quizAnswer = quizAnswers[question].option
-        const userAnswer = form[`inputQuestion${question}`].value
-
-        if (quizAnswer === userAnswer)
-            user_hit_percentage += 100 / questionsAmount
-    }
-
+    userHitPercentage = points * hitValue
 }
 
-function printFeedback() {
+function processFeedbacks() {
 
     const status = {
         correct: "🟢 CORRETO: ",
         wrong: "🔴 ERRADO: "
     }
 
-    for (const question in quizAnswers) {
+    userHitSequence.forEach((correctAnswer, index) => {
+        const targetQuestion = form.querySelector(`.question${index +1}`)
+        const feedbackText = quizAnswersObject[index +1].feedback
 
-        const quizAnswer = quizAnswers[question].option
-        const userAnswer = form[`inputQuestion${question}`].value
-
-        const paragraph = document.createElement('p')
-
-        const feedback = quizAnswers[question].answer
-        const currentQuestion = form.querySelector(`.question${question}`)
-
-        if (quizAnswer === userAnswer) {
-            paragraph.textContent = status.correct + feedback
-            paragraph.setAttribute('class','correct')
+        if (correctAnswer) {
+            addFeedback(status.correct, feedbackText, targetQuestion)
         } else {
-            paragraph.textContent = status.wrong + feedback
-            paragraph.classList.remove('correct')
+            addFeedback(status.wrong, feedbackText, targetQuestion)
         }
-
-        currentQuestion.appendChild(paragraph)
-    }
-
+    })
 }
 
-function animate_user_score() {
+function addFeedback(status, feedback, target) {
+    const newParagraph = document.createElement('p')
+
+    newParagraph.textContent = status + feedback
+    newParagraph.setAttribute('class','correct')
+
+    target.appendChild(newParagraph)
+}
+
+function printScoreMessage() {
+    const scoreMessageContainer = document.getElementById('score-message')
+
+    function setMessage(message) {
+        return scoreMessageContainer.textContent = message
+    }
+
+    const scoreMessage = {
+        1: "Errou tudo 😭",
+        2: "Legal 😉",
+        3: "Bacana! 😘",
+        4: "Muito bem! 😍",
+        5: "Perfeito! 😱"
+    }
+
+    if (userHitPercentage === 0) {
+        setMessage(scoreMessage[1])
+    }
+
+    if (userHitPercentage > 0 && userHitPercentage < 30) {
+        setMessage(scoreMessage[2])
+    }
+
+    if (userHitPercentage > 20 && userHitPercentage < 60) {
+        setMessage(scoreMessage[3])
+    }
+
+    if (userHitPercentage > 50 && userHitPercentage < 90) {
+        setMessage(scoreMessage[4])
+    }
+
+    if (userHitPercentage === 100) {
+        setMessage(scoreMessage[5])
+    }
+}
+
+function animateUserScore() {
+    const score = document.getElementById('score')
 
     setTimeout(()=> {
-
-        score_window.classList.add('big')
 
         let counter = 0
 
         const timer = setInterval(()=> {
 
-            if (counter === user_hit_percentage) {
+            if (counter === userHitPercentage) {
 
                 return clearInterval(timer)
 
@@ -124,26 +162,44 @@ function animate_user_score() {
 
 }
 
-function process_quiz_result(event) {
+function showScoreWindow() {
+    scoreContainer.classList.remove('d-none')
+}
 
-    event.preventDefault()
+function hideScoreWindow() {
 
-    scroll_to_top()
+    submitButton.disabled = true
 
-    getUserScore()
+    scoreContainer.classList.add('review')
 
-    printFeedback()
-
-    score_container.classList.remove('d-none')
-
-    animate_user_score()
+    setTimeout(()=> scoreContainer.classList.add('d-none'), 210)
 
 }
 
-document.onscroll = show_or_hide_scroll_btn
+function processQuizResult(event) {
 
-scroll_btn.onclick = scroll_to_bottom
+    event.preventDefault()
 
-submit_btn.onclick = process_quiz_result
+    scrollToTop()
 
-review_btn.onclick = hide_score_window
+    getUserHits()
+
+    getUserScore()
+
+    processFeedbacks()
+
+    showScoreWindow()
+
+    printScoreMessage()
+
+    animateUserScore()
+
+}
+
+document.onscroll = changeScrollButtonVisibility
+
+scrollButton.onclick = scrollToBottom
+
+submitButton.onclick = processQuizResult
+
+reviewButton.onclick = hideScoreWindow
