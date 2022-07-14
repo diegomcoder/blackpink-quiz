@@ -6,13 +6,14 @@ const submitButton = document.querySelector('#submit-btn')
 const scrollButton = document.querySelector('#scroll-btn')
 const reviewButton = document.querySelector('#review-btn')
 
-
-import quizAnswersObject from './answers.json' assert {type: 'json'}
+const maxPageHeight = document.body.offsetHeight
 
 const userHitSequence = []
-let userHitPercentage = 0
 
-const maxPageHeight = document.body.offsetHeight
+/****** QUIZ ANSWERS ******/
+import quizAnswersObject from './answers.json' assert {type: 'json'}
+
+let userHitPercentage = 0
 
 function changeScrollButtonVisibility() {
     const pageBottomIsHided = scrollY < (maxPageHeight / 2)
