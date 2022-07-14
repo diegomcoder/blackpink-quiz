@@ -1,5 +1,6 @@
 const form = document.querySelector('form')
 const scoreContainer = document.querySelector('.user-score-container')
+const score = document.getElementById('score')
 
 const submitButton = document.querySelector('#submit-btn')
 const scrollButton = document.querySelector('#scroll-btn')
@@ -11,72 +12,42 @@ import quizAnswersObject from './answers.json' assert {type: 'json'}
 const userHitSequence = []
 let userHitPercentage = 0
 
-const pageHeight = document.body.offsetHeight
-
-function scrollToBottom() {
-
-    scrollTo({
-        top: pageHeight,
-        left: 0,
-        behavior: "smooth"
-    })
-
-}
-
-function scrollToTop() {
-
-    scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth"
-    })
-
-}
+const maxPageHeight = document.body.offsetHeight
 
 function changeScrollButtonVisibility() {
+    const pageBottomIsHided = scrollY < (maxPageHeight / 2)
 
-    function showScrollBtn() {
-        scrollButton.classList.remove('d-none')
-    }
-    
-    function HideScrollBtn() {
-        scrollButton.setAttribute('class', 'd-none')
-    }
-
-    const pageBottomIsHided = scrollY < (pageHeight / 2)
-
-    pageBottomIsHided ? showScrollBtn() : HideScrollBtn()
+    pageBottomIsHided ? scrollButtonVisible(true) : scrollButtonVisible(false)
 }
 
 function getUserHits() {
-
     for (const questionNumber in quizAnswersObject) {
-
         const quizAnswer = quizAnswersObject[questionNumber].option
         const userAnswer = form[`inputQuestion${questionNumber}`].value
 
-        if (quizAnswer === userAnswer)
-            userHitSequence.push(true)
-        else
-            userHitSequence.push(false)
+        quizAnswer === userAnswer ?
+			userHitSequence.push(true) : userHitSequence.push(false)
     }
 }
 
 function getUserScore() {
-    let points = 0
-
-    userHitSequence.forEach(correctResult => {
-        correctResult ? points++ : null
-    })
-
-    const questionsAmount = Object.keys(quizAnswersObject).length
+	const questionsAmount = Object.keys(quizAnswersObject).length
     const hitValue = 100 / questionsAmount
 
-    userHitPercentage = points * hitValue
+	userHitPercentage = userHitSequence.reduce((acumulator, answerIsCorrect) =>
+		answerIsCorrect ? acumulator += hitValue : acumulator, 0)
+}
+
+function addFeedback(status, feedback, target) {
+	const newParagraph = document.createElement('p')
+
+	newParagraph.textContent = status + feedback
+	newParagraph.setAttribute('class','correct')
+
+	target.appendChild(newParagraph)
 }
 
 function processFeedbacks() {
-
     const status = {
         correct: "🟢 CORRETO: ",
         wrong: "🔴 ERRADO: "
@@ -86,21 +57,10 @@ function processFeedbacks() {
         const targetQuestion = form.querySelector(`.question${index +1}`)
         const feedbackText = quizAnswersObject[index +1].feedback
 
-        if (correctAnswer) {
+        correctAnswer ?
             addFeedback(status.correct, feedbackText, targetQuestion)
-        } else {
-            addFeedback(status.wrong, feedbackText, targetQuestion)
-        }
+        :	addFeedback(status.wrong, feedbackText, targetQuestion)
     })
-}
-
-function addFeedback(status, feedback, target) {
-    const newParagraph = document.createElement('p')
-
-    newParagraph.textContent = status + feedback
-    newParagraph.setAttribute('class','correct')
-
-    target.appendChild(newParagraph)
 }
 
 function printScoreMessage() {
@@ -118,88 +78,78 @@ function printScoreMessage() {
         5: "Perfeito! 😱"
     }
 
-    if (userHitPercentage === 0) {
-        setMessage(scoreMessage[1])
-    }
-
-    if (userHitPercentage > 0 && userHitPercentage < 30) {
-        setMessage(scoreMessage[2])
-    }
-
-    if (userHitPercentage > 20 && userHitPercentage < 60) {
-        setMessage(scoreMessage[3])
-    }
-
-    if (userHitPercentage > 50 && userHitPercentage < 90) {
-        setMessage(scoreMessage[4])
-    }
-
-    if (userHitPercentage === 100) {
-        setMessage(scoreMessage[5])
-    }
+	switch (userHitPercentage) {
+		case 0:
+			return setMessage(scoreMessage[1])
+		case 10:
+		case 20:
+		case 30:
+			return setMessage(scoreMessage[2])
+		case 40:
+		case 50:
+		case 60:
+			return setMessage(scoreMessage[3])
+		case 70:
+		case 80:
+		case 90:
+			return setMessage(scoreMessage[4])
+		default:
+			setMessage(scoreMessage[5])
+	}
 }
 
 function animateUserScore() {
-    const score = document.getElementById('score')
+    let counter = 0
 
-    setTimeout(()=> {
+	const timer = setInterval(()=> {
+		counter === userHitPercentage ?
+			clearInterval(timer) : score.innerText = `${++counter}%`
 
-        let counter = 0
-
-        const timer = setInterval(()=> {
-
-            if (counter === userHitPercentage) {
-
-                return clearInterval(timer)
-
-            }
-
-            score.innerText = `${++counter}%`
-
-        }, 30)
-
-    }, 10)
-
+	}, 30)
 }
 
-function showScoreWindow() {
-    scoreContainer.classList.remove('d-none')
+function scroll(direction) {
+	if (direction === 'toTop') {
+		return scrollTo({ top: 0, left: 0, behavior: "smooth" })
+	}
+
+	scrollTo({ top: maxPageHeight, left: 0, behavior: "smooth" })
 }
 
-function hideScoreWindow() {
+function scrollButtonVisible(visible) {
+	if (visible) {
+		return scrollButton.classList.remove('d-none')
+	}
 
-    submitButton.disabled = true
-
-    scoreContainer.classList.add('review')
-
-    setTimeout(()=> scoreContainer.classList.add('d-none'), 210)
-
+	scrollButton.setAttribute('class', 'd-none')
 }
 
-function processQuizResult(event) {
+function scoreWindowVisible(visible) {
+	if (visible) {
+		return scoreContainer.classList.remove('d-none')
+	}
 
-    event.preventDefault()
+	submitButton.disabled = true
+	scoreContainer.classList.add('review')
+	setTimeout(()=> scoreContainer.classList.add('d-none'), 210)
+}
 
-    scrollToTop()
+function processQuizResult(_) {
+    _.preventDefault()
 
+    scroll('toTop')
     getUserHits()
-
     getUserScore()
-
     processFeedbacks()
-
-    showScoreWindow()
-
+    scoreWindowVisible(true)
     printScoreMessage()
-
     animateUserScore()
-
 }
 
-document.onscroll = changeScrollButtonVisibility
+form.addEventListener('submit', event => processQuizResult(event))
 
-scrollButton.onclick = scrollToBottom
+document.addEventListener('scroll', () => changeScrollButtonVisibility())
 
-submitButton.onclick = processQuizResult
+scrollButton.addEventListener('click', () => scroll('toBottom'))
 
-reviewButton.onclick = hideScoreWindow
+reviewButton.addEventListener('click', () => scoreWindowVisible(false))
