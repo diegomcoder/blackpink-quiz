@@ -10,7 +10,7 @@ const maxPageHeight = document.body.offsetHeight
 
 const userHitSequence = []
 
-const testNumber = 2
+const testNumber = 3
 console.log(`test number ${testNumber}`);
 /****** IMPORT QUIZ ANSWERS ******/
 // OLD WAY BELLOW
@@ -20,7 +20,7 @@ console.log(`test number ${testNumber}`);
 let quizAnswersObject = null
 
 fetch("./answer.json").then( res => res.json()).then( data => {
-	quizAnswersObject = data.parse()
+	quizAnswersObject = data
 })
 
 console.log(quizAnswersObject, `test number ${testNumber}`);
