@@ -15,10 +15,11 @@ const userHitSequence = []
 // import quizAnswersObject from './answers.json' assert {type: 'json'}
 
 // NEW WAY BELLOW
-const quizAnswersObject = fetch("./answer.json")
-	.then( res => res.json())
-	.then( data => data )
-	
+let quizAnswersObject = null
+
+fetch("./answer.json").then( res => res.json()).then( data => {
+	quizAnswersObject = data.parse()
+})
 
 let userHitPercentage = 0
 
