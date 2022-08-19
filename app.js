@@ -10,20 +10,15 @@ const maxPageHeight = document.body.offsetHeight
 
 const userHitSequence = []
 
-const testNumber = 3
-console.log(`test number ${testNumber}`);
 /****** IMPORT QUIZ ANSWERS ******/
 // OLD WAY BELLOW
 // import quizAnswersObject from './answers.json' assert {type: 'json'}
 
 // NEW WAY BELLOW
-let quizAnswersObject = null
+const quizAnswersObject = fetch("./answer.json")
+	.then( res => res.json())
+	.then(data => data)
 
-fetch("./answer.json").then( res => res.json()).then( data => {
-	quizAnswersObject = data
-})
-
-console.log(quizAnswersObject, `test number ${testNumber}`);
 
 let userHitPercentage = 0
 
