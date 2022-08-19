@@ -21,6 +21,8 @@ fetch("./answer.json").then( res => res.json()).then( data => {
 	quizAnswersObject = data.parse()
 })
 
+console.log(quizAnswersObject, "1");
+
 let userHitPercentage = 0
 
 function changeScrollButtonVisibility() {
