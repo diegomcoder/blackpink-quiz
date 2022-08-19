@@ -15,7 +15,7 @@ const userHitSequence = []
 // import quizAnswersObject from './answers.json' assert {type: 'json'}
 
 // NEW WAY BELLOW
-const quizAnswersObject = fetch("./answer.json")
+const quizAnswersObject = fetch("./answers.json")
 	.then( res => res.json())
 	.then(data => data)
 
