@@ -10,7 +10,7 @@ const maxPageHeight = document.body.offsetHeight
 
 const userHitSequence = []
 
-const testNumber = 1
+const testNumber = 2
 console.log(`test number ${testNumber}`);
 /****** IMPORT QUIZ ANSWERS ******/
 // OLD WAY BELLOW
