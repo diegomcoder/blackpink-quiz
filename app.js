@@ -78,31 +78,23 @@ function printScoreMessage() {
         return scoreMessageContainer.textContent = message
     }
 
-    const scoreMessage = {
-        1: "Errou tudo 😭",
-        2: "Legal 😉",
-        3: "Bacana! 😘",
-        4: "Muito bem! 😍",
-        5: "Perfeito! 😱"
-    }
-
 	switch (userHitPercentage) {
 		case 0:
-			return setMessage(scoreMessage[1])
+			return setMessage("Errou tudo 😭")
 		case 10:
 		case 20:
 		case 30:
-			return setMessage(scoreMessage[2])
+			return setMessage("Legal 😉")
 		case 40:
 		case 50:
 		case 60:
-			return setMessage(scoreMessage[3])
+			return setMessage("Bacana! 😘")
 		case 70:
 		case 80:
 		case 90:
-			return setMessage(scoreMessage[4])
+			return setMessage("Muito bem! 😍")
 		default:
-			setMessage(scoreMessage[5])
+			setMessage("Perfeito! 😱")
 	}
 }
 
