@@ -6,19 +6,18 @@ const scrollButton = document.querySelector('#scroll-btn')
 const reviewButton = document.querySelector('#review-btn')
 const maxPageHeight = document.body.offsetHeight
 
-const userHitSequence = []
-let quizAnswersObject = null
-
 const state = {
-	quizSubmitted: false,
 	quizAnswersObjectReady: false,
+	quizAnswers: null,
+	userHitSequence: [],
+	userHitPercentage: 0
 }
 
 const request = new XMLHttpRequest()
 
 request.addEventListener("readystatechange", () => {
 	if (request.readyState === 4) {
-		quizAnswersObject = JSON.parse(request.responseText)
+		state.quizAnswers = JSON.parse(request.responseText)
 		state.quizAnswersObjectReady = true
 		state.quizSubmitted = true
 	}
@@ -28,9 +27,6 @@ request.open("GET", "./answers.json")
 request.send()
 
 
-
-let userHitPercentage = 0
-
 function changeScrollButtonVisibility() {
     const pageBottomIsHided = scrollY < (maxPageHeight / 2)
 
@@ -38,20 +34,20 @@ function changeScrollButtonVisibility() {
 }
 
 function getUserHits() {
-    for (const questionNumber in quizAnswersObject) {
-        const quizAnswer = quizAnswersObject[questionNumber].option
+    for (const questionNumber in state.quizAnswers) {
+        const quizAnswer = state.quizAnswers[questionNumber].option
         const userAnswer = form[`inputQuestion${questionNumber}`].value
 
         quizAnswer === userAnswer ?
-			userHitSequence.push(true) : userHitSequence.push(false)
+			state.userHitSequence.push(true) : state.userHitSequence.push(false)
     }
 }
 
 function getUserScore() {
-	const questionsAmount = Object.keys(quizAnswersObject).length
+	const questionsAmount = Object.keys(state.quizAnswers).length
     const hitValue = 100 / questionsAmount
 
-	userHitPercentage = userHitSequence.reduce((acumulator, answerIsCorrect) =>
+	state.userHitPercentage = state.userHitSequence.reduce((acumulator, answerIsCorrect) =>
 		answerIsCorrect ? acumulator += hitValue : acumulator, 0)
 }
 
@@ -70,9 +66,9 @@ function processFeedbacks() {
         wrong: "🔴 ERRADO: "
     }
 
-    userHitSequence.forEach((correctAnswer, index) => {
+    state.userHitSequence.forEach((correctAnswer, index) => {
         const targetQuestion = form.querySelector(`.question${index +1}`)
-        const feedbackText = quizAnswersObject[index +1].feedback
+        const feedbackText = state.quizAnswers[index +1].feedback
 
         correctAnswer ?
             addFeedback(status.correct, feedbackText, targetQuestion)
@@ -87,7 +83,7 @@ function printScoreMessage() {
         return scoreMessageContainer.textContent = message
     }
 
-	switch (userHitPercentage) {
+	switch (state.userHitPercentage) {
 		case 0:
 			return setMessage("Errou tudo 😭")
 		case 10:
@@ -111,7 +107,7 @@ function animateUserScore() {
     let counter = 0
 
 	const timer = setInterval(()=> {
-		counter === userHitPercentage ?
+		counter === state.userHitPercentage ?
 			clearInterval(timer) : score.innerText = `${++counter}%`
 
 	}, 30)
