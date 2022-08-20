@@ -19,7 +19,6 @@ request.addEventListener("readystatechange", () => {
 	if (request.readyState === 4) {
 		state.quizAnswers = JSON.parse(request.responseText)
 		state.quizAnswersObjectReady = true
-		state.quizSubmitted = true
 	}
 })
 
