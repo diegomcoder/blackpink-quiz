@@ -1,23 +1,32 @@
 const form = document.querySelector('form')
 const scoreContainer = document.querySelector('.user-score-container')
 const score = document.getElementById('score')
-
 const submitButton = document.querySelector('#submit-btn')
 const scrollButton = document.querySelector('#scroll-btn')
 const reviewButton = document.querySelector('#review-btn')
-
 const maxPageHeight = document.body.offsetHeight
 
 const userHitSequence = []
+let quizAnswersObject = null
 
-/****** IMPORT QUIZ ANSWERS ******/
-// OLD WAY BELLOW
-// import quizAnswersObject from './answers.json' assert {type: 'json'}
+const state = {
+	quizSubmitted: false,
+	quizAnswersObjectReady: false,
+}
 
-// NEW WAY BELLOW
-const quizAnswersObject = fetch("./answers.json")
-	.then( res => res.json())
-	.then(data => data)
+const request = new XMLHttpRequest()
+
+request.addEventListener("readystatechange", () => {
+	if (request.readyState === 4) {
+		quizAnswersObject = JSON.parse(request.responseText)
+		state.quizAnswersObjectReady = true
+		state.quizSubmitted = true
+	}
+})
+
+request.open("GET", "./answers.json")
+request.send()
+
 
 
 let userHitPercentage = 0
@@ -134,9 +143,7 @@ function scoreWindowVisible(visible) {
 	setTimeout(()=> scoreContainer.classList.add('d-none'), 210)
 }
 
-function processQuizResult(_) {
-    _.preventDefault()
-
+function processQuizResult() {
     scroll('toTop')
     getUserHits()
     getUserScore()
@@ -146,7 +153,15 @@ function processQuizResult(_) {
     animateUserScore()
 }
 
-form.addEventListener('submit', event => processQuizResult(event))
+function checkQuizAnswersObject(_) {
+	_.preventDefault()
+
+	if (state.quizAnswersObjectReady) {
+		processQuizResult()
+	}
+}
+
+form.addEventListener('submit', e => checkQuizAnswersObject(e))
 
 document.addEventListener('scroll', () => changeScrollButtonVisibility())
 
